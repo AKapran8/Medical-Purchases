@@ -1,0 +1,43 @@
+<div class="container">
+  <div *ngIf="isFetched && !modifiedTableData?.length">No data.</div>
+  <div *ngIf="isFetching">Loading...</div>
+
+  <div class="content">
+    <input
+      type="text"
+      placeholder="Search"
+      class="custom-input"
+      (input)="searchHandler($event)"
+    />
+    <table class="custom-table">
+      <thead>
+        <tr>
+          <th *ngFor="let column of columns">
+            {{ column.viewValue }}
+            <input
+              type="text"
+              placeholder="Filter"
+              class="custom-input"
+              (input)="filterHandler($event, column.keyValue)"
+            />
+            <button (click)="sortHandler(column.keyValue)" class="button">
+              SORT
+            </button>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of modifiedTableData">
+          <th>{{ item.name }}</th>
+          <th>{{ item.dosage }}</th>
+          <th>{{ item.mnn_id }}</th>
+          <th>{{ item.multiplicity }}</th>
+          <th>{{ item.num }}</th>
+          <th>{{ item.release_form }}</th>
+          <th>{{ item.subtype }}</th>
+          <th>{{ item.unit }}</th>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
