@@ -15,6 +15,17 @@ import { SortTypeEnum, TableUtilsData } from './utils.model';
 
 import { filterTableData, searchTableData, sortTableData } from './table-utils-functionality';
 
+interface ITableColum {
+  keyValue: string;
+  viewValue: string;
+  isDisplayed: boolean;
+}
+
+interface IPagination {
+  totalItems: number;
+  currentPage: number;
+  itemsPerPage: number;
+}
 @Component({
   selector: 'app-table',
   templateUrl: './table.component.html',
@@ -31,15 +42,21 @@ export class TableComponent implements OnInit {
     search: '',
   };
 
-  public columns: { keyValue: string; viewValue: string }[] = [
-    { keyValue: 'name', viewValue: 'NAME' },
-    { keyValue: 'dosage', viewValue: 'DOSAGE' },
-    { keyValue: 'mnn_id', viewValue: 'ID' },
-    { keyValue: 'multiplicity', viewValue: 'MULTIPLICITY' },
-    { keyValue: 'num', viewValue: 'NUM' },
-    { keyValue: 'release_form', viewValue: 'FORM' },
-    { keyValue: 'subtype', viewValue: 'SUBTITLE' },
-    { keyValue: 'unit', viewValue: 'UNIT' },
+  public paginationOptions: number[] = [10, 15, 20]
+  public pagination: IPagination = {
+    totalItems: 0,
+    currentPage: 1,
+    itemsPerPage: 10,
+  }
+
+  public columns: ITableColum[] = [
+    { keyValue: 'mnn_id', viewValue: 'Ідентифікатор МНН', isDisplayed: true },
+    { keyValue: 'subtype', viewValue: 'Піднапрям', isDisplayed: true },
+    { keyValue: 'num', viewValue: '№ позиції номенклатури', isDisplayed: true },
+    { keyValue: 'name', viewValue: 'МНН', isDisplayed: true },
+    { keyValue: 'release_form', viewValue: 'Форма випуску', isDisplayed: true },
+    { keyValue: 'dosage', viewValue: 'Дозування', isDisplayed: true },
+    { keyValue: 'unit', viewValue: 'Одиниці виміру', isDisplayed: true },
   ];
 
   private _purchases: IPurchase[] = [];
@@ -65,6 +82,7 @@ export class TableComponent implements OnInit {
       .subscribe({
         next: (res) => {
           this._purchases = res || [];
+          this.pagination.totalItems = this._purchases.length;
 
           if (this._purchases?.length) {
             this._modifyTableData();
@@ -127,6 +145,18 @@ export class TableComponent implements OnInit {
     this._setTableData();
   }
 
+
+  public paginationCountChangeHandler(event: Event) {
+    const itemsPerPage: number = +(event.target as HTMLInputElement).value;
+    this.pagination.itemsPerPage = itemsPerPage
+    this._setTableData();
+  }
+
+  public pageChangeHandler(page: number): void {
+    this.pagination.currentPage = page;
+    this._setTableData();
+  }
+
   private _setTableData(): void {
     /* Search */
     const columnsArray: string[] = this.columns.map((c) => c.keyValue);
@@ -145,8 +175,19 @@ export class TableComponent implements OnInit {
       filtered,
     );
 
+    /* Pagination */
+    this.pagination.totalItems = sorted.length;
+    const startIndex = (this.pagination.currentPage - 1) * this.pagination.itemsPerPage;
+    const endIndex = startIndex + this.pagination.itemsPerPage;
     /* Set */
-    this.modifiedTableData = cloneDeep(filtered);
+    this.modifiedTableData = cloneDeep(sorted.slice(startIndex, endIndex));
     this._cdr.markForCheck();
   }
+
+  public getPageNumbers(): number[] {
+    const pageCount = Math.ceil(this.pagination.totalItems / this.pagination.itemsPerPage);
+    const pageNumbers = Array(pageCount).fill(0).map((_, index) => index + 1);
+    return pageNumbers.slice(0, 15);
+  }
+
 }

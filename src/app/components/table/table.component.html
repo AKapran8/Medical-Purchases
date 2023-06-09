@@ -9,6 +9,26 @@
       class="custom-input"
       (input)="searchHandler($event)"
     />
+
+    <div class="pagination">
+      <button
+        *ngFor="let page of getPageNumbers()"
+        [ngClass]="{
+          'pagination-element': true,
+          'active-page': pagination.currentPage === page
+        }"
+        (click)="pageChangeHandler(page)"
+      >
+        {{ page }}
+      </button>
+      <label for="elementsCount"> Per page:</label>
+      <select id="elementsCount" [value]="pagination.itemsPerPage" (change)="paginationCountChangeHandler($event)" >
+        <option *ngFor="let opt of paginationOptions" [value]="opt">
+          {{ opt }}
+        </option>
+      </select>
+    </div>
+
     <table class="custom-table">
       <thead>
         <tr>
@@ -28,13 +48,12 @@
       </thead>
       <tbody>
         <tr *ngFor="let item of modifiedTableData">
-          <th>{{ item.name }}</th>
-          <th>{{ item.dosage }}</th>
           <th>{{ item.mnn_id }}</th>
-          <th>{{ item.multiplicity }}</th>
-          <th>{{ item.num }}</th>
-          <th>{{ item.release_form }}</th>
           <th>{{ item.subtype }}</th>
+          <th>{{ item.num }}</th>
+          <th>{{ item.name }}</th>
+          <th>{{ item.release_form }}</th>
+          <th>{{ item.dosage }}</th>
           <th>{{ item.unit }}</th>
         </tr>
       </tbody>
