@@ -103,60 +103,6 @@ export class TableComponent implements OnInit {
     this._setTableData();
   }
 
-  public searchHandler(event: Event): void {
-    this.tableUtils.search = (event.target as HTMLInputElement).value.trim();
-    this._setTableData();
-  }
-
-  public filterHandler(event: Event, key: string): void {
-    const value: string = (event.target as HTMLInputElement).value.trim();
-
-    if (!this.tableUtils?.filter?.length) {
-      // @ts-ignore
-      this.tableUtils.filter!.push({ key, value })
-    }
-
-    this.tableUtils.filter = this.tableUtils.filter?.map((f) => {
-      if (f.key === key) {
-        return { key, value };
-      }
-      return f;
-    });
-
-    this._setTableData();
-  }
-
-  public sortHandler(key: string): void {
-    const index: number = this.tableUtils?.sort?.findIndex(s => s.key === key) || 0;
-
-    if (index === -1) {
-      this.tableUtils.sort?.push({ key, type: SortTypeEnum.ASC });
-    } else {
-      this.tableUtils.sort = this.tableUtils.sort?.map((s) => {
-        if (s.key === key) {
-          const sortType: SortTypeEnum = s.type === SortTypeEnum.ASC ? SortTypeEnum.DESC : SortTypeEnum.ASC;
-          console.log({ key, type: sortType });
-          return { key, type: sortType };
-        }
-        return s;
-      });
-    }
-
-    this._setTableData();
-  }
-
-
-  public paginationCountChangeHandler(event: Event) {
-    const itemsPerPage: number = +(event.target as HTMLInputElement).value;
-    this.pagination.itemsPerPage = itemsPerPage
-    this._setTableData();
-  }
-
-  public pageChangeHandler(page: number): void {
-    this.pagination.currentPage = page;
-    this._setTableData();
-  }
-
   private _setTableData(): void {
     /* Search */
     const columnsArray: string[] = this.columns.map((c) => c.keyValue);
@@ -184,10 +130,68 @@ export class TableComponent implements OnInit {
     this._cdr.markForCheck();
   }
 
+  /* Search end */
+  public searchHandler(event: Event): void {
+    this.tableUtils.search = (event.target as HTMLInputElement).value.trim();
+    this._setTableData();
+  }
+  /* Search end */
+  /* Filter start */
+  public filterHandler(event: Event, key: string): void {
+    const value: string = (event.target as HTMLInputElement).value.trim();
+
+    if (!this.tableUtils?.filter?.length) {
+      // @ts-ignore
+      this.tableUtils.filter!.push({ key, value })
+    }
+
+    this.tableUtils.filter = this.tableUtils.filter?.map((f) => {
+      if (f.key === key) {
+        return { key, value };
+      }
+      return f;
+    });
+
+    this._setTableData();
+  }
+  /* Filter end */
+  /* Sort start */
+  public sortHandler(key: string): void {
+    const index: number = this.tableUtils?.sort?.findIndex(s => s.key === key) || 0;
+
+    if (index === -1) {
+      this.tableUtils.sort?.push({ key, type: SortTypeEnum.ASC });
+    } else {
+      this.tableUtils.sort = this.tableUtils.sort?.map((s) => {
+        if (s.key === key) {
+          const sortType: SortTypeEnum = s.type === SortTypeEnum.ASC ? SortTypeEnum.DESC : SortTypeEnum.ASC;
+          console.log({ key, type: sortType });
+          return { key, type: sortType };
+        }
+        return s;
+      });
+    }
+
+    this._setTableData();
+  }
+  /* Sort end */
+  /* Pagination start */
+  public paginationCountChangeHandler(event: Event) {
+    const itemsPerPage: number = +(event.target as HTMLInputElement).value;
+    this.pagination.itemsPerPage = itemsPerPage
+    this._setTableData();
+  }
+
+  public pageChangeHandler(page: number): void {
+    this.pagination.currentPage = page;
+    this._setTableData();
+  }
+
   public getPageNumbers(): number[] {
     const pageCount = Math.ceil(this.pagination.totalItems / this.pagination.itemsPerPage);
     const pageNumbers = Array(pageCount).fill(0).map((_, index) => index + 1);
     return pageNumbers.slice(0, 15);
   }
+  /* Pagination end */
 
 }
