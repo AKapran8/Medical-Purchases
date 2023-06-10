@@ -3,42 +3,44 @@ import {
   ChangeDetectorRef,
   Component,
   OnInit,
-} from '@angular/core';
+} from "@angular/core";
 
-import { take } from 'rxjs/operators';
-import { cloneDeep } from 'lodash';
-import * as XLSX from 'xlsx';
-import { saveAs } from 'file-saver';
+import { take } from "rxjs/operators";
+import { cloneDeep } from "lodash";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
+import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 
-import { PurchasesService } from './service/purchases.service';
+import { PurchasesService } from "./service/purchases.service";
 
-import { IPurchase, ITableColum } from './purchases.model';
-import { PageChangeEvent, SortTypeEnum, TableUtilsData } from './utils.model';
+import { IPurchase, ISecondTaskBody, ITableColum } from "./purchases.model";
+import { PageChangeEvent, SortTypeEnum, TableUtilsData } from "./utils.model";
 
 import {
   filterTableData,
   paginateTableData,
   searchTableData,
   sortTableData,
-} from './table-utils-functionality';
+} from "./table-utils-functionality";
 interface IPagination {
   currentPage: number;
   itemsPerPage: number;
 }
 @Component({
-  selector: 'app-table',
-  templateUrl: './table.component.html',
-  styleUrls: ['./table.component.scss'],
+  selector: "app-table",
+  templateUrl: "./table.component.html",
+  styleUrls: ["./table.component.scss"],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TableComponent implements OnInit {
   public isFetching: boolean = false;
   public isFetched: boolean = false;
+  public form: FormGroup | null = null;
 
   public tableUtils: TableUtilsData = {
     filter: [],
     sort: [],
-    search: '',
+    search: "",
   };
 
   public pagination: IPagination = {
@@ -51,13 +53,13 @@ export class TableComponent implements OnInit {
   public paginationOptions: number[] = [10, 25, 50, 100];
 
   public columns: ITableColum[] = [
-    { keyValue: 'mnn_id', viewValue: 'Ідентифікатор МНН', isDisplayed: true },
-    { keyValue: 'subtype', viewValue: 'Піднапрям', isDisplayed: true },
-    { keyValue: 'num', viewValue: '№ позиції номенклатури', isDisplayed: true },
-    { keyValue: 'name', viewValue: 'МНН', isDisplayed: true },
-    { keyValue: 'release_form', viewValue: 'Форма випуску', isDisplayed: true },
-    { keyValue: 'dosage', viewValue: 'Дозування', isDisplayed: true },
-    { keyValue: 'unit', viewValue: 'Одиниці виміру', isDisplayed: true },
+    { keyValue: "mnn_id", viewValue: "Ідентифікатор МНН", isDisplayed: true },
+    { keyValue: "subtype", viewValue: "Піднапрям", isDisplayed: true },
+    { keyValue: "num", viewValue: "№ позиції номенклатури", isDisplayed: true },
+    { keyValue: "name", viewValue: "МНН", isDisplayed: true },
+    { keyValue: "release_form", viewValue: "Форма випуску", isDisplayed: true },
+    { keyValue: "dosage", viewValue: "Дозування", isDisplayed: true },
+    { keyValue: "unit", viewValue: "Одиниці виміру", isDisplayed: true },
   ];
 
   private _purchases: IPurchase[] = [];
@@ -65,13 +67,22 @@ export class TableComponent implements OnInit {
 
   constructor(
     private _purchasesService: PurchasesService,
-    private _cdr: ChangeDetectorRef
+    private _cdr: ChangeDetectorRef,
+    private _formBuilder: FormBuilder
   ) { }
 
   ngOnInit(): void {
     this._initComponentData();
+    this._initForm();
   }
 
+  private _initForm(): void {
+    this.form = this._formBuilder.group({
+      name: ['', Validators.required],
+      lastName: ['', Validators.required],
+      age: [null, [Validators.required, Validators.min(1)]],
+    });
+  }
   public getPurchasesCount(): number {
     return this._purchases.length;
   }
@@ -201,15 +212,15 @@ export class TableComponent implements OnInit {
     const worksheet: XLSX.WorkSheet = XLSX.utils.aoa_to_sheet(data);
     const workbook: XLSX.WorkBook = {
       Sheets: { data: worksheet },
-      SheetNames: ['data'],
+      SheetNames: ["data"],
     };
     const excelBuffer: any = XLSX.write(workbook, {
-      bookType: 'xlsx',
-      type: 'array',
+      bookType: "xlsx",
+      type: "array",
     });
 
     const blob: Blob = new Blob([excelBuffer], {
-      type: 'application/octet-stream',
+      type: "application/octet-stream",
     });
     saveAs(blob, `file-example.xlsx`);
   }
@@ -222,4 +233,29 @@ export class TableComponent implements OnInit {
     return [headers, ...data];
   }
   /* Excel import end */
+  /* Post endpoint */
+  public onSubmit(): void {
+    if (this.form?.invalid) return;
+    if (!this.form?.get('name')?.value?.trim() || !this.form?.get('lastName')?.value?.trim()) return;
+
+    const values = this.form?.value;
+    const requestBody: ISecondTaskBody = {
+      ...values,
+      key: "Kapran"
+    };
+
+    this._purchasesService
+      .secondOptionalTask(requestBody)
+      .pipe(take(1))
+      .subscribe({
+        next: (res) => {
+          console.log(res);
+        },
+        error: (err) => {
+          const errorMessage: string = err?.error?.message || "Something went wrong";
+          alert(errorMessage);
+        },
+      });
+
+  }
 }

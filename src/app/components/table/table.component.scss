@@ -1,6 +1,6 @@
 .container {
-  width: 100%;
-  max-width: 1300px;
+  max-width: 1500px;
+  width: 80%;
   margin: 2rem auto 0 auto;
 }
 
@@ -8,4 +8,19 @@
   display: flex;
   gap: 24px;
   margin-bottom: 1rem;
+}
+
+th .p-inputtext {
+  margin: 1rem 0;
+  display: inline-block;
+  width: 120px;
+}
+
+.form {
+  margin: 1rem 0;
+
+  form {
+    display: flex;
+    gap: 12px;
+  }
 }

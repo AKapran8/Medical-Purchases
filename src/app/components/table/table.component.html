@@ -4,6 +4,42 @@
     <p-progressSpinner></p-progressSpinner>
   </div>
 
+  <div class="form" (submit)="onSubmit()">
+    <form *ngIf="form" [formGroup]="form">
+      <div class="field">
+        <input
+          type="text"
+          placeholder="Name"
+          formControlName="name"
+          pInputText
+        />
+      </div>
+      <div class="field">
+        <input
+          type="text"
+          placeholder="Last Name"
+          formControlName="lastName"
+          pInputText
+        />
+      </div>
+      <div class="field">
+        <input
+          type="number"
+          placeholder="age"
+          formControlName="age"
+          pInputText
+        />
+      </div>
+      <button
+        [disabled]="form.invalid"
+        pButton
+        pRipple
+        type="submit"
+        label="Submit"
+        class="p-button-help"
+      ></button>
+    </form>
+  </div>
   <div class="actions">
     <input
       class="search"
@@ -19,28 +55,40 @@
       label="DOWNLOAD EXCEL"
       class="p-button-success"
     ></button>
+    <!-- -->
   </div>
   <div class="content">
-    <p-table [value]="modifiedTableData">
+    <p-table
+      responsiveLayout="stack"
+      scrollHeight="flex"
+      [value]="modifiedTableData"
+    >
       <ng-template pTemplate="header">
         <tr>
-          <th *ngFor="let column of columns">
-            {{ column.viewValue }}
-            <input
-              type="text"
-              pInputText
-              placeholder="Search"
-              (input)="filterHandler($event, column.keyValue)"
-            />
-
-            <p-button
-              (click)="sortHandler(column.keyValue)"
-              label="SORT"
-            ></p-button>
+          <th *ngFor="let column of columns" pResizableColumn>
+            <div class="header-cell">
+              {{ column.viewValue }}
+              <input
+                type="text"
+                pInputText
+                placeholder="Search"
+                (input)="filterHandler($event, column.keyValue)"
+              />
+              <p-button
+                (click)="sortHandler(column.keyValue)"
+                label="SORT"
+              ></p-button>
+            </div>
           </th>
         </tr>
       </ng-template>
-      <ng-template pTemplate="body" let-item>
+      <ng-template
+        pTemplate="body"
+        let-rowData="rowData"
+        let-item
+        sortMode="multiple"
+        pTemplate="body"
+      >
         <tr>
           <td>{{ item.mnn_id }}</td>
           <td>{{ item.subtype }}</td>
@@ -52,6 +100,7 @@
         </tr>
       </ng-template>
     </p-table>
+
     <p-paginator
       [rows]="pagination.itemsPerPage"
       [totalRecords]="totalItems"
