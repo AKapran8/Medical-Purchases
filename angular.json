@@ -25,20 +25,18 @@
             "inlineStyleLanguage": "scss",
             "assets": ["src/favicon.ico", "src/assets"],
             "styles": ["src/styles.scss"],
-            "scripts": []
+            "scripts": [
+              "node_modules/file-saver/dist/FileSaver.js",
+              "node_modules/lodash/lodash.js"
+            ]
           },
           "configurations": {
             "production": {
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "500kb",
-                  "maximumError": "1mb"
-                },
-                {
-                  "type": "anyComponentStyle",
-                  "maximumWarning": "2kb",
-                  "maximumError": "4kb"
+                  "maximumWarning": "1.50MB",
+                  "maximumError": "2.00MB"
                 }
               ],
               "outputHashing": "all"
@@ -80,7 +78,10 @@
             "inlineStyleLanguage": "scss",
             "assets": ["src/favicon.ico", "src/assets"],
             "styles": ["src/styles.scss"],
-            "scripts": []
+            "scripts": [
+              "node_modules/file-saver/dist/FileSaver.js",
+              "node_modules/lodash/lodash.js"
+            ]
           }
         }
       }
