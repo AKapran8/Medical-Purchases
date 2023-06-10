@@ -57,7 +57,7 @@
     ></button>
   </div>
   <div class="toggle-visibility">
-    <div class="toggle-visibility-item" *ngFor="let col of columns">
+    <div class="toggle-visibility-item" *ngFor="let col of tableColumnsUtils">
       <span>{{ col.viewValue }}</span>
       <p-button
         (click)="toggleColumnVisibility(col.keyValue)"
@@ -75,7 +75,7 @@
       <ng-template pTemplate="header">
         <ng-container>
           <tr>
-            <th *ngFor="let column of columns" pResizableColumn>
+            <th *ngFor="let column of tableColumnsUtils" pResizableColumn>
               <div class="header-cell" *ngIf="column.isDisplayed">
                 <div class="header-content">
                   {{ column.viewValue }}
@@ -105,9 +105,11 @@
         pTemplate="body"
       >
         <tr>
-          <ng-container *ngFor="let column of columns">
+          <ng-container *ngFor="let column of tableColumnsUtils">
             <td>
-              <span *ngIf="isColumnDisplayed(column.keyValue)">{{ item[column.keyValue] }}</span>
+              <span *ngIf="isColumnDisplayed(column.keyValue)">{{
+                item[column.keyValue]
+              }}</span>
             </td>
           </ng-container>
         </tr>

@@ -1,20 +1,7 @@
 import { IPurchase } from './purchases.model';
 import {
-  SortDataType,
-  SortTypeEnum,
-  TableUtilsData,
+  ITableUtilData,
 } from './utils.model';
-
-// export const getDisplayedColumnsFromColumnsManager = (
-//     manageColumnsData: ManageColumnDataType[]
-// ): string[] => {
-//     return manageColumnsData
-//         .filter((item) => item.isDisplayed)
-//         .map((res) => {
-//             return res.key;
-//         });
-// };
-
 
 export const searchTableData = (searchValue: string = '', rows: IPurchase[] = [], columns: string[]): IPurchase[] => {
   if (!searchValue) return rows;
@@ -35,27 +22,27 @@ export const searchTableData = (searchValue: string = '', rows: IPurchase[] = []
   return searched;
 }
 
-export const filterTableData = (
-  tableUtilsData: TableUtilsData,
-  rows: any[] = []
-): any[] => {
-  if (!tableUtilsData || !tableUtilsData.filter) {
+
+export const filterTableData = (columns: ITableUtilData[], rows: any[] = []): any[] => {
+  const filterData = columns.filter((column) => column.filter !== '');
+
+  if (filterData.length === 0) {
     return rows;
   }
 
   return rows.filter((row) => {
     let resultArray: boolean[] = [];
 
-    tableUtilsData.filter?.forEach((filter) => {
-      if (!(filter.key in row)) {
-        throw new Error(filter.key + " field doesn't exist");
+    filterData.forEach((filter) => {
+      if (!(filter.keyValue in row)) {
+        throw new Error(filter.keyValue + " field doesn't exist");
       }
 
       const modifiedFieldValue =
-        row[filter.key] !== undefined && row[filter.key] !== null
-          ? row[filter.key].toString().toLowerCase()
+        row[filter.keyValue] !== undefined && row[filter.keyValue] !== null
+          ? row[filter.keyValue].toString().toLowerCase()
           : '';
-      const searchString = String(filter.value).toLowerCase();
+      const searchString = String(filter.filter).toLowerCase();
       if (modifiedFieldValue.includes(searchString)) {
         resultArray.push(true);
       } else {
@@ -67,21 +54,20 @@ export const filterTableData = (
   });
 };
 
-export const sortTableData = (
-  sortFields: SortDataType[] = [],
-  rows: any[] = []
-): any[] => {
-  if (!sortFields.length) {
+export const sortTableData = (columns: ITableUtilData[], rows: any[] = []): any[] => {
+  const sortFields = columns.filter((column) => column.sort !== '');
+
+  if (sortFields.length === 0) {
     return rows;
   }
 
-  let result = rows.sort((item1, item2) => {
+  return rows.sort((item1, item2) => {
     for (let i = 0; i < sortFields.length; i++) {
       const field = sortFields[i];
-      const { key, type } = field;
+      const { keyValue, sort } = field;
 
-      let firstItem = item1[key];
-      let secondItem = item2[key];
+      let firstItem = item1[keyValue];
+      let secondItem = item2[keyValue];
 
       if (typeof firstItem === 'string') {
         firstItem = firstItem.toLowerCase();
@@ -90,14 +76,14 @@ export const sortTableData = (
         secondItem = secondItem.toLowerCase();
       }
 
-      if (type === SortTypeEnum.ASC) {
+      if (sort === 'ASC') {
         if (firstItem > secondItem) {
           return 1;
         }
         if (firstItem < secondItem) {
           return -1;
         }
-      } else if (type === SortTypeEnum.DESC) {
+      } else if (sort === 'DESC') {
         if (firstItem > secondItem) {
           return -1;
         }
@@ -109,14 +95,13 @@ export const sortTableData = (
 
     return 0;
   });
-
-  return result;
 };
 
+
 export const paginateTableData = (
-    rows: any[],
-    page: number,
-    size: number
+  rows: any[],
+  page: number,
+  size: number
 ): any[] => {
-    return rows.slice((page - 1) * size, page * size);
+  return rows.slice((page - 1) * size, page * size);
 };

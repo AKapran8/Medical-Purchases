@@ -13,8 +13,8 @@ import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 
 import { PurchasesService } from "./service/purchases.service";
 
-import { IPurchase, ISecondTaskBody, ITableColum } from "./purchases.model";
-import { PageChangeEvent, SortTypeEnum, TableUtilsData } from "./utils.model";
+import { IPurchase, ISecondTaskBody, } from "./purchases.model";
+import { PageChangeEvent, ITableUtilData } from "./utils.model";
 
 import {
   filterTableData,
@@ -37,12 +37,7 @@ export class TableComponent implements OnInit {
   public isFetched: boolean = false;
   public form: FormGroup | null = null;
 
-  public tableUtils: TableUtilsData = {
-    filter: [],
-    sort: [],
-    search: "",
-  };
-
+  public inputSearch: string = '';
   public pagination: IPagination = {
     currentPage: 1,
     itemsPerPage: 10,
@@ -52,14 +47,14 @@ export class TableComponent implements OnInit {
 
   public paginationOptions: number[] = [10, 25, 50, 100];
 
-  public columns: ITableColum[] = [
-    { keyValue: "mnn_id", viewValue: "Ідентифікатор МНН", isDisplayed: true },
-    { keyValue: "subtype", viewValue: "Піднапрям", isDisplayed: true },
-    { keyValue: "num", viewValue: "№ позиції номенклатури", isDisplayed: true },
-    { keyValue: "name", viewValue: "МНН", isDisplayed: true },
-    { keyValue: "release_form", viewValue: "Форма випуску", isDisplayed: true },
-    { keyValue: "dosage", viewValue: "Дозування", isDisplayed: true },
-    { keyValue: "unit", viewValue: "Одиниці виміру", isDisplayed: true },
+  public tableColumnsUtils: ITableUtilData[] = [
+    { keyValue: "mnn_id", viewValue: "Ідентифікатор МНН", isDisplayed: true, sort: '', filter: '' },
+    { keyValue: "subtype", viewValue: "Піднапрям", isDisplayed: true, sort: '', filter: '' },
+    { keyValue: "num", viewValue: "№ позиції номенклатури", isDisplayed: true, sort: '', filter: '' },
+    { keyValue: "name", viewValue: "МНН", isDisplayed: true, sort: '', filter: '' },
+    { keyValue: "release_form", viewValue: "Форма випуску", isDisplayed: true, sort: '', filter: '' },
+    { keyValue: "dosage", viewValue: "Дозування", isDisplayed: true, sort: '', filter: '' },
+    { keyValue: "unit", viewValue: "Одиниці виміру", isDisplayed: true, sort: '', filter: '' },
   ];
 
   private _purchases: IPurchase[] = [];
@@ -125,18 +120,18 @@ export class TableComponent implements OnInit {
 
   private _setTableData(): void {
     /* Search */
-    const columnsArray: string[] = this.columns.map((c) => c.keyValue);
+    const columnsArray: string[] = this.tableColumnsUtils.map((c) => c.keyValue);
     const searched: IPurchase[] = searchTableData(
-      this.tableUtils.search,
+      this.inputSearch,
       this._purchases,
       columnsArray
     );
 
     /* Filter */
-    const filtered: IPurchase[] = filterTableData(this.tableUtils, searched);
+    const filtered: IPurchase[] = filterTableData(this.tableColumnsUtils, searched);
 
     /* Sort */
-    const sorted = sortTableData(this.tableUtils.sort || [], filtered);
+    const sorted = sortTableData(this.tableColumnsUtils || [], filtered);
 
     /* Pagination */
     this.totalItems = sorted.length;
@@ -153,7 +148,7 @@ export class TableComponent implements OnInit {
 
   /* Search end */
   public searchHandler(event: Event): void {
-    this.tableUtils.search = (event.target as HTMLInputElement).value.trim();
+    this.inputSearch = (event.target as HTMLInputElement).value.trim();
     this._setTableData();
   }
   /* Search end */
@@ -161,18 +156,13 @@ export class TableComponent implements OnInit {
   /* Filter start */
   public filterHandler(event: Event, key: string): void {
     const value: string = (event.target as HTMLInputElement).value.trim();
+    const column = this.tableColumnsUtils.find((c) => c.keyValue === key);
 
-    if (!this.tableUtils?.filter?.length) {
-      // @ts-ignore
-      this.tableUtils.filter!.push({ key, value });
+    if (column) {
+      column.filter = value;
     }
 
-    this.tableUtils.filter = this.tableUtils.filter?.map((f) => {
-      if (f.key === key) {
-        return { key, value };
-      }
-      return f;
-    });
+    console.log(this.tableColumnsUtils)
 
     this._setTableData();
   }
@@ -180,21 +170,12 @@ export class TableComponent implements OnInit {
 
   /* Sort start */
   public sortHandler(key: string): void {
-    const index: number =
-      this.tableUtils?.sort?.findIndex((s) => s.key === key) || 0;
+    const index: number = this.tableColumnsUtils.findIndex((c) => c.keyValue === key);
 
-    if (index === -1) {
-      this.tableUtils.sort?.push({ key, type: SortTypeEnum.ASC });
-    } else {
-      this.tableUtils.sort = this.tableUtils.sort?.map((s) => {
-        if (s.key === key) {
-          const sortType: SortTypeEnum =
-            s.type === SortTypeEnum.ASC ? SortTypeEnum.DESC : SortTypeEnum.ASC;
-          console.log({ key, type: sortType });
-          return { key, type: sortType };
-        }
-        return s;
-      });
+    if (index !== -1) {
+      const currentSortType = this.tableColumnsUtils[index].sort;
+      const sortType = currentSortType === 'ASC' ? 'DESC' : 'ASC';
+      this.tableColumnsUtils[index].sort = sortType;
     }
 
     this._setTableData();
@@ -215,7 +196,7 @@ export class TableComponent implements OnInit {
 
   /* Toggle column visibility start */
   public toggleColumnVisibility(key: string): void {
-    const column = this.columns.find(c => c.keyValue === key);
+    const column = this.tableColumnsUtils.find(c => c.keyValue === key);
     if (column) {
       column.isDisplayed = !column.isDisplayed;
     }
@@ -223,7 +204,7 @@ export class TableComponent implements OnInit {
   }
 
   public isColumnDisplayed(key: string): boolean {
-    const column = this.columns.find(c => c.keyValue === key);
+    const column = this.tableColumnsUtils.find(c => c.keyValue === key);
     return column ? column.isDisplayed : false;
   }
   /* Toggle column visibility end */
@@ -249,7 +230,7 @@ export class TableComponent implements OnInit {
   }
 
   private _getWorkSheetData(): any[][] {
-    const headers: string[] = this.columns.map((c) => c.viewValue);
+    const headers: string[] = this.tableColumnsUtils.map((c) => c.viewValue);
     const data: string[][] = this.modifiedTableData.map((purchase) =>
       Object.values(purchase).map((value) => String(value))
     );
@@ -284,7 +265,7 @@ export class TableComponent implements OnInit {
   /* Post endpoint end */
 
   public hasDisplayedColumn(): boolean {
-    return this.columns.some(c => c.isDisplayed);
+    return this.tableColumnsUtils.some(c => c.isDisplayed);
   }
-  
+
 }

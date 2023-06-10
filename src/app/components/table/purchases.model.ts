@@ -9,15 +9,9 @@ export interface IPurchase {
   multiplicity?: number; //not required in task, but returned from back
 }
 
-export interface ITableColum {
-  keyValue: string;
-  viewValue: string;
-  isDisplayed: boolean;
-}
-
 export interface ISecondTaskBody {
   name: string;
   lastName: string;
   age: number;
-  key: "Kapran"
+  readonly key: "Kapran"
 }
