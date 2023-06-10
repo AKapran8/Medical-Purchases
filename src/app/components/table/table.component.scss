@@ -10,7 +10,7 @@
   margin-bottom: 1rem;
 }
 
-th .p-inputtext {
+th div .p-inputtext {
   margin: 1rem 0;
   display: inline-block;
   width: 120px;
@@ -22,5 +22,16 @@ th .p-inputtext {
   form {
     display: flex;
     gap: 12px;
+  }
+}
+
+.toggle-visibility {
+  display: flex;
+  gap: 24px;
+  margin: 3rem 0;
+
+  span {
+    display: inline-block;
+    margin: 0 12px 10px 0;
   }
 }

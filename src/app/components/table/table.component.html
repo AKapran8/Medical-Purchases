@@ -55,7 +55,15 @@
       label="DOWNLOAD EXCEL"
       class="p-button-success"
     ></button>
-    <!-- -->
+  </div>
+  <div class="toggle-visibility">
+    <div class="toggle-visibility-item" *ngFor="let col of columns">
+      <span>{{ col.viewValue }}</span>
+      <p-button
+        (click)="toggleColumnVisibility(col.keyValue)"
+        [label]="col.isDisplayed ? 'HIDE' : 'SHOW'"
+      ></p-button>
+    </div>
   </div>
   <div class="content">
     <p-table
@@ -64,24 +72,30 @@
       [value]="modifiedTableData"
     >
       <ng-template pTemplate="header">
-        <tr>
-          <th *ngFor="let column of columns" pResizableColumn>
-            <div class="header-cell">
-              {{ column.viewValue }}
-              <input
-                type="text"
-                pInputText
-                placeholder="Search"
-                (input)="filterHandler($event, column.keyValue)"
-              />
-              <p-button
-                (click)="sortHandler(column.keyValue)"
-                label="SORT"
-              ></p-button>
-            </div>
-          </th>
-        </tr>
+        <ng-container>
+          <tr>
+            <th *ngFor="let column of columns" pResizableColumn>
+              <div class="header-cell" *ngIf="column.isDisplayed">
+                <div class="header-content">
+                  {{ column.viewValue }}
+                  <input
+                    type="text"
+                    pInputText
+                    placeholder="Search"
+                    (input)="filterHandler($event, column.keyValue)"
+                  />
+                  <p-button
+                    (click)="sortHandler(column.keyValue)"
+                    label="SORT"
+                  ></p-button>
+                </div>
+              </div>
+              <div *ngIf="!column.isDisplayed"></div>
+            </th>
+          </tr>
+        </ng-container>
       </ng-template>
+
       <ng-template
         pTemplate="body"
         let-rowData="rowData"
@@ -90,13 +104,11 @@
         pTemplate="body"
       >
         <tr>
-          <td>{{ item.mnn_id }}</td>
-          <td>{{ item.subtype }}</td>
-          <td>{{ item.num }}</td>
-          <td>{{ item.name }}</td>
-          <td>{{ item.release_form }}</td>
-          <td>{{ item.dosage }}</td>
-          <td>{{ item.unit }}</td>
+          <ng-container *ngFor="let column of columns">
+            <td *ngIf="isColumnDisplayed(column.keyValue)">
+              <span>{{ item[column.keyValue] }}</span>
+            </td>
+          </ng-container>
         </tr>
       </ng-template>
     </p-table>

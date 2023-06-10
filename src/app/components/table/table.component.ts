@@ -256,6 +256,18 @@ export class TableComponent implements OnInit {
           alert(errorMessage);
         },
       });
-
   }
+
+  public toggleColumnVisibility(key: string): void {
+    const column = this.columns.find(c => c.keyValue === key);
+    if (column) {
+      column.isDisplayed = !column.isDisplayed;
+    }
+  }
+
+  public isColumnDisplayed(key: string): boolean {
+    const column = this.columns.find(c => c.keyValue === key);
+    return column ? column.isDisplayed : false;
+  }
+
 }
