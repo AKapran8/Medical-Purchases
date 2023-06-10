@@ -77,18 +77,22 @@
           <tr>
             <th *ngFor="let column of tableColumnsUtils" pResizableColumn>
               <div class="header-cell" *ngIf="column.isDisplayed">
-                <div class="header-content">
+                <div
+                  class="header-content"
+                  (click)="sortHandler(column.keyValue)"
+                >
                   {{ column.viewValue }}
+                  <i class="pi pi-angle-up" *ngIf="column.sort === 'ASC'"></i>
+                  <i
+                    class="pi pi-angle-down"
+                    *ngIf="column.sort === 'DESC'"
+                  ></i>
                   <input
                     type="text"
                     pInputText
                     placeholder="Search"
                     (input)="filterHandler($event, column.keyValue)"
                   />
-                  <p-button
-                    (click)="sortHandler(column.keyValue)"
-                    label="SORT"
-                  ></p-button>
                 </div>
               </div>
               <div *ngIf="!column.isDisplayed"></div>
