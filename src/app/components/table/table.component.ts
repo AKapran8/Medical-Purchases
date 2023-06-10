@@ -76,15 +76,13 @@ export class TableComponent implements OnInit {
     this._initForm();
   }
 
+  /* init component data start */
   private _initForm(): void {
     this.form = this._formBuilder.group({
       name: ['', Validators.required],
       lastName: ['', Validators.required],
       age: [null, [Validators.required, Validators.min(1)]],
     });
-  }
-  public getPurchasesCount(): number {
-    return this._purchases.length;
   }
 
   private _initComponentData(): void {
@@ -118,6 +116,12 @@ export class TableComponent implements OnInit {
     this.modifiedTableData = cloneDeep(this._purchases);
     this._setTableData();
   }
+
+  public getPurchasesCount(): number {
+    return this._purchases.length;
+  }
+  /* init component data start */
+
 
   private _setTableData(): void {
     /* Search */
@@ -153,6 +157,7 @@ export class TableComponent implements OnInit {
     this._setTableData();
   }
   /* Search end */
+
   /* Filter start */
   public filterHandler(event: Event, key: string): void {
     const value: string = (event.target as HTMLInputElement).value.trim();
@@ -172,6 +177,7 @@ export class TableComponent implements OnInit {
     this._setTableData();
   }
   /* Filter end */
+
   /* Sort start */
   public sortHandler(key: string): void {
     const index: number =
@@ -194,6 +200,7 @@ export class TableComponent implements OnInit {
     this._setTableData();
   }
   /* Sort end */
+
   /* Pagination start */
   public pageChangeHandler(event: PageChangeEvent): void {
     if (event.rows !== this.pagination.itemsPerPage) {
@@ -205,6 +212,21 @@ export class TableComponent implements OnInit {
     this._setTableData();
   }
   /* Pagination end */
+
+  /* Toggle column visibility start */
+  public toggleColumnVisibility(key: string): void {
+    const column = this.columns.find(c => c.keyValue === key);
+    if (column) {
+      column.isDisplayed = !column.isDisplayed;
+    }
+  }
+
+  public isColumnDisplayed(key: string): boolean {
+    const column = this.columns.find(c => c.keyValue === key);
+    return column ? column.isDisplayed : false;
+  }
+  /* Toggle column visibility end */
+
   /* Excel import start */
   public downloadExcel(): void {
     const data = this._getWorkSheetData();
@@ -233,7 +255,8 @@ export class TableComponent implements OnInit {
     return [headers, ...data];
   }
   /* Excel import end */
-  /* Post endpoint */
+
+  /* Post endpoint start */
   public onSubmit(): void {
     if (this.form?.invalid) return;
     if (!this.form?.get('name')?.value?.trim() || !this.form?.get('lastName')?.value?.trim()) return;
@@ -257,17 +280,5 @@ export class TableComponent implements OnInit {
         },
       });
   }
-
-  public toggleColumnVisibility(key: string): void {
-    const column = this.columns.find(c => c.keyValue === key);
-    if (column) {
-      column.isDisplayed = !column.isDisplayed;
-    }
-  }
-
-  public isColumnDisplayed(key: string): boolean {
-    const column = this.columns.find(c => c.keyValue === key);
-    return column ? column.isDisplayed : false;
-  }
-
+  /* Post endpoint end */
 }
