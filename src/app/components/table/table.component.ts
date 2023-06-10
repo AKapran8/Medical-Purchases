@@ -219,6 +219,7 @@ export class TableComponent implements OnInit {
     if (column) {
       column.isDisplayed = !column.isDisplayed;
     }
+    this._cdr.markForCheck();
   }
 
   public isColumnDisplayed(key: string): boolean {
@@ -276,9 +277,14 @@ export class TableComponent implements OnInit {
         },
         error: (err) => {
           const errorMessage: string = err?.error?.message || "Something went wrong";
-          alert(errorMessage);
+          console.log(errorMessage);
         },
       });
   }
   /* Post endpoint end */
+
+  public hasDisplayedColumn(): boolean {
+    return this.columns.some(c => c.isDisplayed);
+  }
+  
 }

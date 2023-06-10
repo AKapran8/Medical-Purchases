@@ -67,6 +67,7 @@
   </div>
   <div class="content">
     <p-table
+      *ngIf="hasDisplayedColumn()"
       responsiveLayout="stack"
       scrollHeight="flex"
       [value]="modifiedTableData"
@@ -105,8 +106,8 @@
       >
         <tr>
           <ng-container *ngFor="let column of columns">
-            <td *ngIf="isColumnDisplayed(column.keyValue)">
-              <span>{{ item[column.keyValue] }}</span>
+            <td>
+              <span *ngIf="isColumnDisplayed(column.keyValue)">{{ item[column.keyValue] }}</span>
             </td>
           </ng-container>
         </tr>
