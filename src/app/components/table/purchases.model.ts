@@ -8,3 +8,9 @@ export interface IPurchase {
     name: string; 
     multiplicity?: number; //not required in task, but returned from back
 }
+
+export interface ITableColum {
+    keyValue: string;
+    viewValue: string;
+    isDisplayed: boolean;
+  }

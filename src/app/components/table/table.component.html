@@ -1,62 +1,65 @@
 <div class="container">
-  <div *ngIf="isFetched && !modifiedTableData?.length">No data.</div>
-  <div *ngIf="isFetching">Loading...</div>
+  <div *ngIf="isFetched && !getPurchasesCount()">No data.</div>
+  <div *ngIf="isFetching">
+    <p-progressSpinner></p-progressSpinner>
+  </div>
 
-  <div class="content">
+  <div class="actions">
     <input
+      class="search"
       type="text"
+      pInputText
       placeholder="Search"
-      class="custom-input"
       (input)="searchHandler($event)"
     />
-
-    <div class="pagination">
-      <button
-        *ngFor="let page of getPageNumbers()"
-        [ngClass]="{
-          'pagination-element': true,
-          'active-page': pagination.currentPage === page
-        }"
-        (click)="pageChangeHandler(page)"
-      >
-        {{ page }}
-      </button>
-      <label for="elementsCount"> Per page:</label>
-      <select id="elementsCount" [value]="pagination.itemsPerPage" (change)="paginationCountChangeHandler($event)" >
-        <option *ngFor="let opt of paginationOptions" [value]="opt">
-          {{ opt }}
-        </option>
-      </select>
-    </div>
-
-    <table class="custom-table">
-      <thead>
+    <button
+      pButton
+      pRipple
+      (click)="downloadExcel()"
+      label="DOWNLOAD EXCEL"
+      class="p-button-success"
+    ></button>
+  </div>
+  <div class="content">
+    <p-table [value]="modifiedTableData">
+      <ng-template pTemplate="header">
         <tr>
           <th *ngFor="let column of columns">
             {{ column.viewValue }}
             <input
               type="text"
-              placeholder="Filter"
-              class="custom-input"
+              pInputText
+              placeholder="Search"
               (input)="filterHandler($event, column.keyValue)"
             />
-            <button (click)="sortHandler(column.keyValue)" class="button">
-              SORT
-            </button>
+
+            <p-button
+              (click)="sortHandler(column.keyValue)"
+              label="SORT"
+            ></p-button>
           </th>
         </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let item of modifiedTableData">
-          <th>{{ item.mnn_id }}</th>
-          <th>{{ item.subtype }}</th>
-          <th>{{ item.num }}</th>
-          <th>{{ item.name }}</th>
-          <th>{{ item.release_form }}</th>
-          <th>{{ item.dosage }}</th>
-          <th>{{ item.unit }}</th>
+      </ng-template>
+      <ng-template pTemplate="body" let-item>
+        <tr>
+          <td>{{ item.mnn_id }}</td>
+          <td>{{ item.subtype }}</td>
+          <td>{{ item.num }}</td>
+          <td>{{ item.name }}</td>
+          <td>{{ item.release_form }}</td>
+          <td>{{ item.dosage }}</td>
+          <td>{{ item.unit }}</td>
         </tr>
-      </tbody>
-    </table>
+      </ng-template>
+    </p-table>
+    <p-paginator
+      [rows]="pagination.itemsPerPage"
+      [totalRecords]="totalItems"
+      [pageLinkSize]="5"
+      [rowsPerPageOptions]="paginationOptions"
+      (onPageChange)="pageChangeHandler($event)"
+    ></p-paginator>
+
+    <div *ngIf="isFetched && !modifiedTableData.length">No filter data.</div>
   </div>
 </div>

@@ -7,22 +7,21 @@ import {
 
 import { take } from 'rxjs/operators';
 import { cloneDeep } from 'lodash';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
 
 import { PurchasesService } from './service/purchases.service';
 
-import { IPurchase } from './purchases.model';
-import { SortTypeEnum, TableUtilsData } from './utils.model';
+import { IPurchase, ITableColum } from './purchases.model';
+import { PageChangeEvent, SortTypeEnum, TableUtilsData } from './utils.model';
 
-import { filterTableData, searchTableData, sortTableData } from './table-utils-functionality';
-
-interface ITableColum {
-  keyValue: string;
-  viewValue: string;
-  isDisplayed: boolean;
-}
-
+import {
+  filterTableData,
+  paginateTableData,
+  searchTableData,
+  sortTableData,
+} from './table-utils-functionality';
 interface IPagination {
-  totalItems: number;
   currentPage: number;
   itemsPerPage: number;
 }
@@ -42,12 +41,14 @@ export class TableComponent implements OnInit {
     search: '',
   };
 
-  public paginationOptions: number[] = [10, 15, 20]
   public pagination: IPagination = {
-    totalItems: 0,
     currentPage: 1,
     itemsPerPage: 10,
-  }
+  };
+
+  public totalItems: number = 0;
+
+  public paginationOptions: number[] = [10, 25, 50, 100];
 
   public columns: ITableColum[] = [
     { keyValue: 'mnn_id', viewValue: 'Ідентифікатор МНН', isDisplayed: true },
@@ -71,6 +72,10 @@ export class TableComponent implements OnInit {
     this._initComponentData();
   }
 
+  public getPurchasesCount(): number {
+    return this._purchases.length;
+  }
+
   private _initComponentData(): void {
     this.isFetching = true;
     this.isFetched = false;
@@ -82,7 +87,7 @@ export class TableComponent implements OnInit {
       .subscribe({
         next: (res) => {
           this._purchases = res || [];
-          this.pagination.totalItems = this._purchases.length;
+          this.totalItems = this._purchases.length;
 
           if (this._purchases?.length) {
             this._modifyTableData();
@@ -116,17 +121,18 @@ export class TableComponent implements OnInit {
     const filtered: IPurchase[] = filterTableData(this.tableUtils, searched);
 
     /* Sort */
-    const sorted = sortTableData(
-      this.tableUtils.sort || [],
-      filtered,
-    );
+    const sorted = sortTableData(this.tableUtils.sort || [], filtered);
 
     /* Pagination */
-    this.pagination.totalItems = sorted.length;
-    const startIndex = (this.pagination.currentPage - 1) * this.pagination.itemsPerPage;
-    const endIndex = startIndex + this.pagination.itemsPerPage;
+    this.totalItems = sorted.length;
+    const pagination = paginateTableData(
+      sorted,
+      this.pagination.currentPage,
+      this.pagination.itemsPerPage
+    );
+
     /* Set */
-    this.modifiedTableData = cloneDeep(sorted.slice(startIndex, endIndex));
+    this.modifiedTableData = cloneDeep(pagination);
     this._cdr.markForCheck();
   }
 
@@ -142,7 +148,7 @@ export class TableComponent implements OnInit {
 
     if (!this.tableUtils?.filter?.length) {
       // @ts-ignore
-      this.tableUtils.filter!.push({ key, value })
+      this.tableUtils.filter!.push({ key, value });
     }
 
     this.tableUtils.filter = this.tableUtils.filter?.map((f) => {
@@ -157,14 +163,16 @@ export class TableComponent implements OnInit {
   /* Filter end */
   /* Sort start */
   public sortHandler(key: string): void {
-    const index: number = this.tableUtils?.sort?.findIndex(s => s.key === key) || 0;
+    const index: number =
+      this.tableUtils?.sort?.findIndex((s) => s.key === key) || 0;
 
     if (index === -1) {
       this.tableUtils.sort?.push({ key, type: SortTypeEnum.ASC });
     } else {
       this.tableUtils.sort = this.tableUtils.sort?.map((s) => {
         if (s.key === key) {
-          const sortType: SortTypeEnum = s.type === SortTypeEnum.ASC ? SortTypeEnum.DESC : SortTypeEnum.ASC;
+          const sortType: SortTypeEnum =
+            s.type === SortTypeEnum.ASC ? SortTypeEnum.DESC : SortTypeEnum.ASC;
           console.log({ key, type: sortType });
           return { key, type: sortType };
         }
@@ -176,22 +184,42 @@ export class TableComponent implements OnInit {
   }
   /* Sort end */
   /* Pagination start */
-  public paginationCountChangeHandler(event: Event) {
-    const itemsPerPage: number = +(event.target as HTMLInputElement).value;
-    this.pagination.itemsPerPage = itemsPerPage
+  public pageChangeHandler(event: PageChangeEvent): void {
+    if (event.rows !== this.pagination.itemsPerPage) {
+      this.pagination.itemsPerPage = event.rows;
+      this.pagination.currentPage = 1;
+    } else {
+      this.pagination.currentPage = event.page + 1;
+    }
     this._setTableData();
-  }
-
-  public pageChangeHandler(page: number): void {
-    this.pagination.currentPage = page;
-    this._setTableData();
-  }
-
-  public getPageNumbers(): number[] {
-    const pageCount = Math.ceil(this.pagination.totalItems / this.pagination.itemsPerPage);
-    const pageNumbers = Array(pageCount).fill(0).map((_, index) => index + 1);
-    return pageNumbers.slice(0, 15);
   }
   /* Pagination end */
+  /* Excel import start */
+  public downloadExcel(): void {
+    const data = this._getWorkSheetData();
 
+    const worksheet: XLSX.WorkSheet = XLSX.utils.aoa_to_sheet(data);
+    const workbook: XLSX.WorkBook = {
+      Sheets: { data: worksheet },
+      SheetNames: ['data'],
+    };
+    const excelBuffer: any = XLSX.write(workbook, {
+      bookType: 'xlsx',
+      type: 'array',
+    });
+
+    const blob: Blob = new Blob([excelBuffer], {
+      type: 'application/octet-stream',
+    });
+    saveAs(blob, `file-example.xlsx`);
+  }
+
+  private _getWorkSheetData(): any[][] {
+    const headers: string[] = this.columns.map((c) => c.viewValue);
+    const data: string[][] = this.modifiedTableData.map((purchase) =>
+      Object.values(purchase).map((value) => String(value))
+    );
+    return [headers, ...data];
+  }
+  /* Excel import end */
 }

@@ -20,3 +20,10 @@ export enum FieldTypeEnum {
   string,
   number,
 }
+
+export interface PageChangeEvent {
+  page:  number;
+  first: number;
+  pageCount: number;
+  rows: number;
+}
