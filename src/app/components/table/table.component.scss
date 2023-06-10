@@ -30,6 +30,12 @@ th div .p-inputtext {
   gap: 24px;
   margin: 3rem 0;
 
+  &-item {
+    border: 1px solid black;
+    padding: 8px;
+    border-radius: 4px;
+  }
+
   span {
     display: inline-block;
     margin: 0 12px 10px 0;

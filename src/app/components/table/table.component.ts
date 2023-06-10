@@ -22,6 +22,7 @@ import {
   searchTableData,
   sortTableData,
 } from "./table-utils-functionality";
+import { TABLE_COLUMNS_CONFIG } from "./table-data.config";
 interface IPagination {
   currentPage: number;
   itemsPerPage: number;
@@ -47,15 +48,7 @@ export class TableComponent implements OnInit {
 
   public paginationOptions: number[] = [10, 25, 50, 100];
 
-  public tableColumnsUtils: ITableUtilData[] = [
-    { keyValue: "mnn_id", viewValue: "Ідентифікатор МНН", isDisplayed: true, sort: '', filter: '' },
-    { keyValue: "subtype", viewValue: "Піднапрям", isDisplayed: true, sort: '', filter: '' },
-    { keyValue: "num", viewValue: "№ позиції номенклатури", isDisplayed: true, sort: '', filter: '' },
-    { keyValue: "name", viewValue: "МНН", isDisplayed: true, sort: '', filter: '' },
-    { keyValue: "release_form", viewValue: "Форма випуску", isDisplayed: true, sort: '', filter: '' },
-    { keyValue: "dosage", viewValue: "Дозування", isDisplayed: true, sort: '', filter: '' },
-    { keyValue: "unit", viewValue: "Одиниці виміру", isDisplayed: true, sort: '', filter: '' },
-  ];
+  public tableColumnsUtils: ITableUtilData[] = [];
 
   private _purchases: IPurchase[] = [];
   public modifiedTableData: IPurchase[] = [];
@@ -67,11 +60,16 @@ export class TableComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    this._initComponentData();
+    this._initColumnsData()
     this._initForm();
+    this._initComponentData();
   }
 
   /* init component data start */
+  private _initColumnsData(): void {
+    this.tableColumnsUtils = JSON.parse(JSON.stringify(TABLE_COLUMNS_CONFIG))
+  }
+
   private _initForm(): void {
     this.form = this._formBuilder.group({
       name: ['', Validators.required],
@@ -115,8 +113,7 @@ export class TableComponent implements OnInit {
   public getPurchasesCount(): number {
     return this._purchases.length;
   }
-  /* init component data start */
-
+  /* init component data end */
 
   private _setTableData(): void {
     /* Search */
@@ -264,8 +261,8 @@ export class TableComponent implements OnInit {
   }
   /* Post endpoint end */
 
+  /* Another */
   public hasDisplayedColumn(): boolean {
     return this.tableColumnsUtils.some(c => c.isDisplayed);
   }
-
 }
