@@ -3,43 +3,6 @@
   <div *ngIf="isFetching">
     <p-progressSpinner></p-progressSpinner>
   </div>
-
-  <div class="form" (submit)="onSubmit()">
-    <form *ngIf="form" [formGroup]="form">
-      <div class="field">
-        <input
-          type="text"
-          placeholder="Name"
-          formControlName="name"
-          pInputText
-        />
-      </div>
-      <div class="field">
-        <input
-          type="text"
-          placeholder="Last Name"
-          formControlName="lastName"
-          pInputText
-        />
-      </div>
-      <div class="field">
-        <input
-          type="number"
-          placeholder="age"
-          formControlName="age"
-          pInputText
-        />
-      </div>
-      <button
-        [disabled]="form.invalid"
-        pButton
-        pRipple
-        type="submit"
-        label="Submit"
-        class="p-button-help"
-      ></button>
-    </form>
-  </div>
   <div class="actions">
     <input
       class="search"
@@ -133,4 +96,46 @@
 
     <div *ngIf="isFetched && !modifiedTableData.length">No filter data.</div>
   </div>
+
+
+  <button pButton (click)="showForm = !showForm">{{showForm ? "Hide Form" : "Show Form"}}</button>
+
+  <div class="form" (submit)="onSubmit()" *ngIf="showForm" >
+    <form *ngIf="form" [formGroup]="form">
+      <div class="field">
+        <input
+          type="text"
+          placeholder="Name"
+          formControlName="name"
+          pInputText
+        />
+      </div>
+      <div class="field">
+        <input
+          type="text"
+          placeholder="Last Name"
+          formControlName="lastName"
+          pInputText
+        />
+      </div>
+      <div class="field">
+        <input
+          type="number"
+          placeholder="age"
+          formControlName="age"
+          pInputText
+        />
+      </div>
+      <button
+        [disabled]="form.invalid"
+        pButton
+        pRipple
+        type="submit"
+        label="Submit"
+        class="p-button-help"
+      ></button>
+    </form>
+  </div>
 </div>
+
+

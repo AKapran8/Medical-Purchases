@@ -18,21 +18,25 @@ th div .p-inputtext {
 
 .form {
   margin: 2rem 0;
+  max-width: 200px;
 
   form {
-    align-items: center;
     display: flex;
     flex-direction: column;
-  }
 
-  button {
-    display: block;
-    width: auto;
+    button {
+      display: inline-block;
+    }
   }
 }
 
 .field {
   margin: 12px 0;
+
+  input {
+    display: inline-block;
+    width: 100%;
+  }
 }
 
 .toggle-visibility {

@@ -44,6 +44,7 @@ interface IPagination {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TableComponent implements OnInit {
+  public showForm: boolean = false;
   public isFetching: boolean = false;
   public isFetched: boolean = false;
   public form: FormGroup | null = null;
