@@ -3,78 +3,86 @@ import {
   ChangeDetectorRef,
   Component,
   OnInit,
-} from "@angular/core";
+} from '@angular/core';
 
-import { take } from "rxjs/operators";
-import { cloneDeep } from "lodash";
-import * as XLSX from "xlsx";
-import { saveAs } from "file-saver";
-import { FormBuilder, FormGroup, Validators } from "@angular/forms";
+import { take } from 'rxjs/operators';
+import { cloneDeep } from 'lodash';
+import {
+  WorkSheet as WorkSheetXLSX,
+  WorkBook as WorkBookXLSX,
+  utils as utilsXLSX,
+  write as writeXLSX,
+} from 'xlsx';
+import { saveAs } from 'file-saver';
+import {
+  FormBuilder,
+  FormControl,
+  FormGroup,
+  Validators,
+} from '@angular/forms';
 
-import { PurchasesService } from "./service/purchases.service";
+import { PurchasesService } from './service/purchases.service';
 
-import { IPurchase, ISecondTaskBody, } from "./purchases.model";
-import { PageChangeEvent, ITableUtilData } from "./utils.model";
+import { IPurchase, ISecondTaskBody } from './purchases.model';
+import { PageChangeEvent, ITableUtilData } from './utils.model';
 
 import {
   filterTableData,
   paginateTableData,
   searchTableData,
   sortTableData,
-} from "./table-utils-functionality";
-import { TABLE_COLUMNS_CONFIG } from "./table-data.config";
+} from './table-utils-functionality';
+import { TABLE_COLUMNS_CONFIG } from './table-data.config';
 interface IPagination {
   currentPage: number;
   itemsPerPage: number;
 }
 @Component({
-  selector: "app-table",
-  templateUrl: "./table.component.html",
-  styleUrls: ["./table.component.scss"],
+  selector: 'app-table',
+  templateUrl: './table.component.html',
+  styleUrls: ['./table.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TableComponent implements OnInit {
   public isFetching: boolean = false;
   public isFetched: boolean = false;
   public form: FormGroup | null = null;
-
+  public totalItems: number = 0;
+  public paginationOptions: number[] = [10, 25, 50, 100];
+  public tableColumnsUtils: ITableUtilData[] = [];
+  public modifiedTableData: IPurchase[] = [];
   public inputSearch: string = '';
   public pagination: IPagination = {
     currentPage: 1,
     itemsPerPage: 10,
   };
 
-  public totalItems: number = 0;
-
-  public paginationOptions: number[] = [10, 25, 50, 100];
-
-  public tableColumnsUtils: ITableUtilData[] = [];
-
   private _purchases: IPurchase[] = [];
-  public modifiedTableData: IPurchase[] = [];
 
   constructor(
     private _purchasesService: PurchasesService,
     private _cdr: ChangeDetectorRef,
     private _formBuilder: FormBuilder
-  ) { }
+  ) {}
 
   ngOnInit(): void {
-    this._initColumnsData()
+    this._initColumnsData();
     this._initForm();
     this._initComponentData();
   }
 
-  /* init component data start */
   private _initColumnsData(): void {
-    this.tableColumnsUtils = JSON.parse(JSON.stringify(TABLE_COLUMNS_CONFIG))
+    this.tableColumnsUtils = JSON.parse(JSON.stringify(TABLE_COLUMNS_CONFIG));
   }
 
   private _initForm(): void {
-    this.form = this._formBuilder.group({
-      name: ['', Validators.required],
-      lastName: ['', Validators.required],
-      age: [null, [Validators.required, Validators.min(1)]],
+    this.form = new FormGroup({
+      name: new FormControl<string>('', [Validators.required]),
+      lastName: new FormControl<string>('', [Validators.required]),
+      age: new FormControl<number | null>(null, [
+        Validators.required,
+        Validators.min(1),
+      ]),
     });
   }
 
@@ -99,6 +107,7 @@ export class TableComponent implements OnInit {
           this._cdr.markForCheck();
         },
         error: (error) => {
+          console.log(error.error?.message || 'Something went wrong!');
           this.isFetching = false;
           this.isFetched = true;
         },
@@ -113,24 +122,27 @@ export class TableComponent implements OnInit {
   public getPurchasesCount(): number {
     return this._purchases.length;
   }
-  /* init component data end */
 
   private _setTableData(): void {
-    /* Search */
-    const columnsArray: string[] = this.tableColumnsUtils.map((c) => c.keyValue);
+    const columnsArray: string[] = this.tableColumnsUtils.map(
+      (c) => c.keyValue
+    );
     const searched: IPurchase[] = searchTableData(
       this.inputSearch,
       this._purchases,
       columnsArray
     );
 
-    /* Filter */
-    const filtered: IPurchase[] = filterTableData(this.tableColumnsUtils, searched);
+    const filtered: IPurchase[] = filterTableData(
+      this.tableColumnsUtils,
+      searched
+    );
 
-    /* Sort */
-    const sorted = sortTableData(this.tableColumnsUtils || [], filtered);
+    const sorted: IPurchase[] = sortTableData(
+      this.tableColumnsUtils || [],
+      filtered
+    );
 
-    /* Pagination */
     this.totalItems = sorted.length;
     const pagination = paginateTableData(
       sorted,
@@ -138,19 +150,15 @@ export class TableComponent implements OnInit {
       this.pagination.itemsPerPage
     );
 
-    /* Set */
     this.modifiedTableData = cloneDeep(pagination);
     this._cdr.markForCheck();
   }
 
-  /* Search end */
   public searchHandler(event: Event): void {
     this.inputSearch = (event.target as HTMLInputElement).value.trim();
     this._setTableData();
   }
-  /* Search end */
 
-  /* Filter start */
   public filterHandler(event: Event, key: string): void {
     const value: string = (event.target as HTMLInputElement).value.trim();
     const column = this.tableColumnsUtils.find((c) => c.keyValue === key);
@@ -159,15 +167,13 @@ export class TableComponent implements OnInit {
       column.filter = value;
     }
 
-    console.log(this.tableColumnsUtils)
-
     this._setTableData();
   }
-  /* Filter end */
 
-  /* Sort start */
   public sortHandler(key: string): void {
-    const index: number = this.tableColumnsUtils.findIndex((c) => c.keyValue === key);
+    const index: number = this.tableColumnsUtils.findIndex(
+      (c) => c.keyValue === key
+    );
 
     if (index !== -1) {
       const currentSortType = this.tableColumnsUtils[index].sort;
@@ -177,9 +183,7 @@ export class TableComponent implements OnInit {
 
     this._setTableData();
   }
-  /* Sort end */
 
-  /* Pagination start */
   public pageChangeHandler(event: PageChangeEvent): void {
     if (event.rows !== this.pagination.itemsPerPage) {
       this.pagination.itemsPerPage = event.rows;
@@ -189,11 +193,9 @@ export class TableComponent implements OnInit {
     }
     this._setTableData();
   }
-  /* Pagination end */
 
-  /* Toggle column visibility start */
   public toggleColumnVisibility(key: string): void {
-    const column = this.tableColumnsUtils.find(c => c.keyValue === key);
+    const column = this.tableColumnsUtils.find((c) => c.keyValue === key);
     if (column) {
       column.isDisplayed = !column.isDisplayed;
     }
@@ -201,27 +203,25 @@ export class TableComponent implements OnInit {
   }
 
   public isColumnDisplayed(key: string): boolean {
-    const column = this.tableColumnsUtils.find(c => c.keyValue === key);
+    const column = this.tableColumnsUtils.find((c) => c.keyValue === key);
     return column ? column.isDisplayed : false;
   }
-  /* Toggle column visibility end */
 
-  /* Excel import start */
   public downloadExcel(): void {
     const data = this._getWorkSheetData();
 
-    const worksheet: XLSX.WorkSheet = XLSX.utils.aoa_to_sheet(data);
-    const workbook: XLSX.WorkBook = {
+    const worksheet: WorkSheetXLSX = utilsXLSX.aoa_to_sheet(data);
+    const workbook: WorkBookXLSX = {
       Sheets: { data: worksheet },
-      SheetNames: ["data"],
+      SheetNames: ['data'],
     };
-    const excelBuffer: any = XLSX.write(workbook, {
-      bookType: "xlsx",
-      type: "array",
+    const excelBuffer: any = writeXLSX(workbook, {
+      bookType: 'xlsx',
+      type: 'array',
     });
 
     const blob: Blob = new Blob([excelBuffer], {
-      type: "application/octet-stream",
+      type: 'application/octet-stream',
     });
     saveAs(blob, `file-example.xlsx`);
   }
@@ -233,17 +233,19 @@ export class TableComponent implements OnInit {
     );
     return [headers, ...data];
   }
-  /* Excel import end */
 
-  /* Post endpoint start */
   public onSubmit(): void {
     if (this.form?.invalid) return;
-    if (!this.form?.get('name')?.value?.trim() || !this.form?.get('lastName')?.value?.trim()) return;
+    if (
+      !this.form?.get('name')?.value?.trim() ||
+      !this.form?.get('lastName')?.value?.trim()
+    )
+      return;
 
     const values = this.form?.value;
     const requestBody: ISecondTaskBody = {
       ...values,
-      key: "Kapran"
+      key: 'Kapran',
     };
 
     this._purchasesService
@@ -254,15 +256,13 @@ export class TableComponent implements OnInit {
           console.log(res);
         },
         error: (err) => {
-          const errorMessage: string = err?.error?.message || "Something went wrong";
-          console.log(errorMessage);
+          const errorMessage: string =
+            err?.error?.message || 'Something went wrong';
         },
       });
   }
-  /* Post endpoint end */
 
-  /* Another */
   public hasDisplayedColumn(): boolean {
-    return this.tableColumnsUtils.some(c => c.isDisplayed);
+    return this.tableColumnsUtils.some((c) => c.isDisplayed);
   }
 }

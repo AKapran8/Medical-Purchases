@@ -13,5 +13,5 @@ export interface ISecondTaskBody {
   name: string;
   lastName: string;
   age: number;
-  readonly key: "Kapran"
+  readonly key: "Kapran";
 }
