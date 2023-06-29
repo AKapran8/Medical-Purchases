@@ -14,7 +14,7 @@ export class PurchasesService {
     return this._http.get<IPurchase[] | []>(`https://api.medzakupivli.com/appellation/type/?hash=8f7d225ffda84d9a143ca8c9868779a95cc9b033`)
   }
 
-  // I don't understand what that endpoint so I name it like this
+  // I don't understand what that endpoint do, so I name it like this
   public secondOptionalTask(body: ISecondTaskBody): Observable<any> {
     const param: string = body.key;
     return this._http.post<any>(`https://api.medzakupivli.com/inbound_logistics/angular/?name=${param}`, body);

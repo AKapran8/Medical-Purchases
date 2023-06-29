@@ -17,6 +17,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
+            "allowedCommonJsDependencies": ["lodash", "file-saver"],
             "outputPath": "dist/test-task",
             "index": "src/index.html",
             "main": "src/main.ts",
