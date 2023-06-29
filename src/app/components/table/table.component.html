@@ -121,12 +121,15 @@
     </p-table>
 
     <p-paginator
+      *ngIf="hasDisplayedColumn()"
       [rows]="pagination.itemsPerPage"
       [totalRecords]="totalItems"
       [pageLinkSize]="5"
       [rowsPerPageOptions]="paginationOptions"
       (onPageChange)="pageChangeHandler($event)"
     ></p-paginator>
+
+    <p *ngIf="!hasDisplayedColumn()">No visible data.</p>
 
     <div *ngIf="isFetched && !modifiedTableData.length">No filter data.</div>
   </div>

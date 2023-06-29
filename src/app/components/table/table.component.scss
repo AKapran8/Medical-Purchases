@@ -20,24 +20,44 @@ th div .p-inputtext {
   margin: 2rem 0;
 
   form {
+    align-items: center;
     display: flex;
-    gap: 12px;
+    flex-direction: column;
+  }
+
+  button {
+    display: block;
+    width: auto;
   }
 }
 
+.field {
+  margin: 12px 0;
+}
+
 .toggle-visibility {
+  margin: 2rem 0 1rem 0;
   display: flex;
-  gap: 24px;
-  margin: 3rem 0;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 10px;
+  border: 1px solid #ccc;
+  padding: 8px;
+  border-radius: 4px;
+  min-width: 400px;
+  align-items: center;
+  text-align: center;
+}
 
-  &-item {
-    border: 1px solid black;
-    padding: 8px;
-    border-radius: 4px;
-  }
+.toggle-visibility-item {
+  display: flex;
+  align-items: center;
+  border: 1px solid #ccc;
+  padding: 5px;
+  border-radius: 4px;
+}
 
-  span {
-    display: inline-block;
-    margin: 0 12px 10px 0;
-  }
+.toggle-visibility-item span {
+  margin-right: 5px;
+  font-weight: bold;
 }
