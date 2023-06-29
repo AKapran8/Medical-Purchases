@@ -61,3 +61,13 @@ th div .p-inputtext {
   margin-right: 5px;
   font-weight: bold;
 }
+
+@media (max-width: 960px) {
+  tr {
+    display: inline-block;
+    border: 1px solid black !important;
+    border-radius: 8px;
+    width: 100%;
+    margin: 4px 0;
+  }
+}
